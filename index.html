@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodePen Clone</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <!-- CodeMirror for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+</head>
+<body>
+    <!-- Header with title and save button -->
+    <header class="header">
+        <h1 class="logo">CodePen Clone</h1>
+        <button id="saveBtn" class="save-btn">Save</button>
+    </header>
+
+    <!-- Main container -->
+    <div class="container">
+        <!-- Code editors section -->
+        <div class="editors-section">
+            <!-- HTML Editor -->
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span class="editor-title">HTML</span>
+                </div>
+                <textarea id="htmlEditor" class="code-editor" placeholder="<!-- Write your HTML here -->"></textarea>
+            </div>
+
+            <!-- CSS Editor -->
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span class="editor-title">CSS</span>
+                </div>
+                <textarea id="cssEditor" class="code-editor" placeholder="/* Write your CSS here */"></textarea>
+            </div>
+
+            <!-- JavaScript Editor -->
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span class="editor-title">JavaScript</span>
+                </div>
+                <textarea id="jsEditor" class="code-editor" placeholder="// Write your JavaScript here"></textarea>
+            </div>
+        </div>
+
+        <!-- Preview section -->
+        <div class="preview-section">
+            <div class="preview-header">
+                <span class="preview-title">Preview</span>
+                <button id="refreshBtn" class="refresh-btn">↻</button>
+            </div>
+            <iframe id="preview" class="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="loading-indicator hidden">
+        <div class="spinner"></div>
+        <span>Saving...</span>
+    </div>
+
+    <!-- Success message -->
+    <div id="successMessage" class="success-message hidden">
+        Code saved successfully!
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
