@@ -4,7 +4,8 @@ import {
   signInWithEmailAndPassword, 
   signInWithPopup,
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config';
 
@@ -34,9 +35,23 @@ export function AuthProvider({ children }) {
     return signOut(auth);
   }
 
+  function resetPassword(email) {
+    return sendPasswordResetEmail(auth, email);
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+      if (user) {
+        // For Google users, displayName is automatically available
+        // For email users, use email as fallback if no displayName
+        const userData = {
+          ...user,
+          displayName: user.displayName || user.email.split('@')[0]
+        };
+        setCurrentUser(userData);
+      } else {
+        setCurrentUser(null);
+      }
       setLoading(false);
     });
 
@@ -48,7 +63,8 @@ export function AuthProvider({ children }) {
     signup,
     login,
     loginWithGoogle,
-    logout
+    logout,
+    resetPassword
   };
 
   return (

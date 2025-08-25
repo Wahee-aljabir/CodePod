@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
-function Login({ onSwitchToSignup }) {
+function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -95,6 +95,17 @@ function Login({ onSwitchToSignup }) {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Forgot Password Link */}
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              onClick={onSwitchToForgotPassword}
+              className="text-sm text-blue-400 hover:text-blue-300"
+            >
+              Forgot your password?
+            </button>
           </div>
 
           <div>
