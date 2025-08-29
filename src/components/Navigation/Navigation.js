@@ -123,7 +123,7 @@ const Navigation = () => {
                   </svg>
                   Discussions
                 </button>
-                <button className="dropdown-item" onClick={() => setShowDropdown(false)}>
+                <button className="dropdown-item" onClick={() => { navigate('/profile'); setShowDropdown(false); }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M20 21V19C20 16.7909 18.2091 15 16 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>

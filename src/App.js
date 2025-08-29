@@ -8,8 +8,10 @@ import ProjectEditor from './components/ProjectEditor/ProjectEditor';
 import Navigation from './components/Navigation/Navigation';
 import DiscussionList from './components/Discussion/DiscussionList';
 import DiscussionDetail from './components/Discussion/DiscussionDetail';
+import Profile from './components/Profile/Profile';
 import './App.css';
 
+<Route path="/profile" element={<Profile />} />
 // Wrapper component for Dashboard with navigation functions
 function DashboardWrapper() {
   const navigate = useNavigate();
@@ -65,6 +67,16 @@ function DiscussionDetailWrapper() {
   );
 }
 
+// Wrapper component for Profile with navigation
+function ProfileWrapper() {
+  return (
+    <>
+      <Navigation />
+      <Profile />
+    </>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -85,6 +97,11 @@ function App() {
             <Route path="/editor/:projectId" element={
               <ProtectedRoute>
                 <ProjectEditorWrapper />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfileWrapper />
               </ProtectedRoute>
             } />
             <Route path="/discussions" element={
