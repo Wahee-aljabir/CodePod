@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
   const [email, setEmail] = useState('');
@@ -7,6 +8,7 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -15,11 +17,11 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
       setError('');
       setLoading(true);
       await login(email, password);
+      navigate('/');
     } catch (error) {
       setError('Failed to log in: ' + error.message);
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   async function handleGoogleLogin() {
@@ -27,10 +29,11 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
       setError('');
       setLoading(true);
       await loginWithGoogle();
+      navigate('/');
     } catch (error) {
       setError('Failed to log in with Google: ' + error.message);
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

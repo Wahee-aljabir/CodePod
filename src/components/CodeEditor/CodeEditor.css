@@ -1,0 +1,103 @@
+.code-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 0; /* Important for flex child to shrink */
+}
+
+.editor-tabs {
+  display: flex;
+  background-color: #2d2d2d;
+  border-bottom: 1px solid #333;
+  flex-shrink: 0; /* Prevent tabs from shrinking */
+}
+
+.tab {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.tab:hover {
+  background-color: #3c3c3c;
+  color: #fff;
+}
+
+.tab.active {
+  color: #fff;
+  background-color: #1e1e1e;
+  border-bottom-color: #007acc;
+}
+
+/* JavaScript Tip Styling */
+.js-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, #fef3c7, #fde68a);
+  border-bottom: 1px solid #f59e0b;
+  color: #92400e;
+  font-size: 12px;
+  line-height: 1.4;
+  animation: slideDown 0.3s ease-out;
+}
+
+.tip-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.tip-text {
+  flex: 1;
+}
+
+.tip-text code {
+  background: rgba(146, 64, 14, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 11px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.editor-container {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0; /* Important for flex child to shrink */
+  position: relative;
+}
+
+/* Custom scrollbar styling for Monaco Editor */
+.editor-container .monaco-editor .monaco-scrollable-element > .scrollbar {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px !important;
+}
+
+.editor-container .monaco-editor .monaco-scrollable-element > .scrollbar > .slider {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 4px !important;
+}
+
+.editor-container .monaco-editor .monaco-scrollable-element > .scrollbar > .slider:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+}

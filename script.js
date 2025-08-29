@@ -187,13 +187,13 @@ async function saveCode() {
             console.log('Code saved to Firestore successfully');
         } else {
             // Fallback to localStorage
-            const savedCodes = JSON.parse(localStorage.getItem('codepen-saves') || '[]');
+            const savedCodes = JSON.parse(localStorage.getItem('codepod-saves') || '[]');
             savedCodes.push(codeData);
             // Keep only last 10 saves to prevent storage overflow
             if (savedCodes.length > 10) {
                 savedCodes.shift();
             }
-            localStorage.setItem('codepen-saves', JSON.stringify(savedCodes));
+            localStorage.setItem('codepod-saves', JSON.stringify(savedCodes));
             console.log('Code saved to localStorage successfully');
         }
 
@@ -221,7 +221,7 @@ function generateId() {
 // Load sample code on first visit
 function loadSampleCode() {
     const sampleHTML = `<div class="container">
-    <h1>Welcome to CodePen Clone!</h1>
+    <h1>Welcome to CodePod!</h1>
     <p>Start coding and see your changes live!</p>
     <button id="clickMe">Click me!</button>
 </div>`;
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    console.log('CodePen Clone initialized successfully!');
+    console.log('CodePod initialized successfully!');
 });
 
 // Handle window resize for responsive layout
