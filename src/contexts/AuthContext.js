@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, googleProvider } from '../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase/config';
 import { 
   onAuthStateChanged, 
   signOut, 
@@ -17,10 +19,68 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState({
+    avatarUrl: '',
+    avatarColor: '#667eea',
+    displayName: '',
+    email: ''
+  });
+
+  // Load user profile data
+  const loadUserProfile = async (user) => {
+    if (!user) {
+      setUserProfile({
+        avatarUrl: '',
+        avatarColor: '#667eea',
+        displayName: '',
+        email: ''
+      });
+      return;
+    }
+
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserProfile({
+          avatarUrl: userData.avatarUrl || '',
+          avatarColor: userData.avatarColor || '#667eea',
+          displayName: userData.displayName || userData.email?.split('@')[0] || '',
+          email: userData.email || user.email
+        });
+      } else {
+        // Set default profile for new users
+        setUserProfile({
+          avatarUrl: '',
+          avatarColor: '#667eea',
+          displayName: user.email?.split('@')[0] || '',
+          email: user.email
+        });
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      setUserProfile({
+        avatarUrl: '',
+        avatarColor: '#667eea',
+        displayName: user.email?.split('@')[0] || '',
+        email: user.email
+      });
+    }
+  };
+
+  // Update user profile (to be called from Profile component)
+  const updateUserProfile = (profileData) => {
+    setUserProfile(prev => ({
+      ...prev,
+      ...profileData
+    }));
+  };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      await loadUserProfile(user);
       setLoading(false);
     });
 
@@ -64,6 +124,9 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     loading,
+    userProfile,
+    updateUserProfile,
+    loadUserProfile,
     login,
     signup,
     loginWithGoogle,

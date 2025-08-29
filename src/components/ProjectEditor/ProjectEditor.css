@@ -212,6 +212,20 @@ input:checked + .slider:before {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
+.thumbnail-upload-btn {
+  position: relative;
+  cursor: pointer;
+}
+
+.thumbnail-upload-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.thumbnail-file-input {
+  display: none;
+}
+
 .spinning {
   animation: spin 1s linear infinite;
 }
@@ -219,6 +233,19 @@ input:checked + .slider:before {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Ensure proper spacing in editor-actions */
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.project-visibility {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .editor-content {

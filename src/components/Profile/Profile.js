@@ -64,14 +64,18 @@ const Profile = () => {
     }));
   };
 
+  // In the Profile component, add this line after the other hooks
+  const { updateUserProfile } = useAuth();
+  
+  // In the handleAvatarUpload function, after setting the profile state, add:
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+  
     // Reset previous messages
     setError('');
     setSuccess('');
-
+  
     try {
       setUploading(true);
       
@@ -89,6 +93,9 @@ const Profile = () => {
         ...prev,
         avatarUrl: result.url
       }));
+      
+      // Update the global auth context so Navigation updates immediately
+      updateUserProfile({ avatarUrl: result.url });
       
       setSuccess('Avatar uploaded successfully! Don\'t forget to save your changes.');
       setTimeout(() => setSuccess(''), 5000);

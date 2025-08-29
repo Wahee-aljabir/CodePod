@@ -4,6 +4,7 @@
   flex-direction: column;
   background-color: #1e1e1e;
   color: #fff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .app-nav {
@@ -18,9 +19,13 @@
 
 .nav-brand h1 {
   margin: 0;
-  color: #007acc;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
 }
 
 .nav-user {
@@ -32,6 +37,7 @@
 .nav-user span {
   color: #ccc;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .auth-container {
@@ -41,10 +47,11 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
   color: #fff;
+  font-family: 'Inter', sans-serif;
 }
 
 .main-content {
-  padding-top: 80px; /* Account for fixed navigation */
+  padding-top: 80px;
   min-height: calc(100vh - 80px);
 }
 
@@ -73,11 +80,12 @@
 .btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
 }
 
 .btn:disabled {
@@ -86,12 +94,14 @@
 }
 
 .btn-primary {
-  background-color: #007acc;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #005a9e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-secondary {
@@ -99,8 +109,13 @@
   color: white;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background-color: #666;
+}
+
+/* Code editor font */
+.code-editor, .monaco-editor {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
 }
 
 /* Global styles */

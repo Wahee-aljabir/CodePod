@@ -3,6 +3,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import CodeEditor from '../CodeEditor/CodeEditor';
 import LivePreview from '../LivePreview/LivePreview';
 import { saveProject, getProject } from '../../services/firestoreService';
+import { updateDoc, doc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
+import cloudinaryService from '../../services/cloudinaryService';
 import './ProjectEditor.css';
 
 const ProjectEditor = ({ projectId = null }) => {
@@ -13,6 +16,7 @@ const ProjectEditor = ({ projectId = null }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [project, setProject] = useState(null);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
 
   // Load existing project if projectId is provided
   useEffect(() => {
@@ -146,6 +150,44 @@ const ProjectEditor = ({ projectId = null }) => {
     setLastSaved(null);
   };
 
+  const handleThumbnailUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file || !project?.id) {
+      if (!project?.id) {
+        alert('Please save the project first before uploading a thumbnail.');
+      }
+      return;
+    }
+
+    setUploadingThumbnail(true);
+    try {
+      const result = await cloudinaryService.uploadThumbnail(file);
+      
+      // Update project in Firestore - fix the property names
+      const projectRef = doc(db, 'projects', project.id);
+      await updateDoc(projectRef, {
+        thumbnailUrl: result.url,        // Changed from result.secure_url
+        thumbnailPublicId: result.publicId  // Changed from result.public_id
+      });
+
+      // Update local state - fix the property names
+      setProject(prev => ({
+        ...prev,
+        thumbnailUrl: result.url,        // Changed from result.secure_url
+        thumbnailPublicId: result.publicId  // Changed from result.public_id
+      }));
+
+      alert('Thumbnail uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading thumbnail:', error);
+      alert('Error uploading thumbnail: ' + error.message);
+    } finally {
+      setUploadingThumbnail(false);
+      // Clear the input
+      event.target.value = '';
+    }
+  };
+
   if (!currentUser) {
     return (
       <div className="project-editor">
@@ -193,6 +235,30 @@ const ProjectEditor = ({ projectId = null }) => {
               </span>
             )}
           </div>
+          
+          {/* Thumbnail Upload Button */}
+          <label className="btn btn-secondary btn-icon thumbnail-upload-btn" title="Upload Thumbnail">
+            {uploadingThumbnail ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="spinning">
+                <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.3"/>
+                <path d="M21 12C21 7.02944 16.9706 3 12 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23 19C23 20.1046 22.1046 21 21 21H3C1.89543 21 1 20.1046 1 19V8C1 6.89543 1.89543 6 3 6H7L9 4H15L17 6H21C22.1046 6 23 6.89543 23 8V19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="13" r="3" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleThumbnailUpload}
+              className="thumbnail-file-input"
+              disabled={uploadingThumbnail || !project?.id}
+              style={{ display: 'none' }}
+            />
+          </label>
+          
           <button onClick={handleNewProject} className="btn btn-secondary btn-icon" title="New Project">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

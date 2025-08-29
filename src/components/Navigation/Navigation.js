@@ -1,26 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../firebase/config';
 import './Navigation.css';
 
 const Navigation = () => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, userProfile } = useAuth();
   const navigate = useNavigate();
-  const [avatarColor, setAvatarColor] = useState('#667eea');
   const [showDropdown, setShowDropdown] = useState(false);
-
-  // Generate random color
-  const generateRandomColor = () => {
-    const colors = [
-      '#667eea', '#764ba2', '#f093fb', '#f5576c',
-      '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-      '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3',
-      '#ff9a9e', '#fecfef', '#ffeaa7', '#fab1a0'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
 
   // Get user initials
   const getUserInitials = (email) => {
@@ -31,35 +17,6 @@ const Navigation = () => {
     }
     return email.substring(0, 2).toUpperCase();
   };
-
-  // Load or generate avatar color
-  useEffect(() => {
-    const loadAvatarColor = async () => {
-      if (!currentUser) return;
-      
-      try {
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        
-        if (userDoc.exists() && userDoc.data().avatarColor) {
-          setAvatarColor(userDoc.data().avatarColor);
-        } else {
-          // Generate and save new color
-          const newColor = generateRandomColor();
-          await setDoc(doc(db, 'users', currentUser.uid), {
-            avatarColor: newColor,
-            email: currentUser.email,
-            createdAt: new Date()
-          }, { merge: true });
-          setAvatarColor(newColor);
-        }
-      } catch (error) {
-        console.error('Error loading avatar color:', error);
-        setAvatarColor(generateRandomColor());
-      }
-    };
-
-    loadAvatarColor();
-  }, [currentUser]);
 
   const handleLogout = async () => {
     try {
@@ -89,9 +46,17 @@ const Navigation = () => {
             <button 
               className="profile-avatar"
               onClick={() => setShowDropdown(!showDropdown)}
-              style={{ backgroundColor: avatarColor }}
+              style={{ backgroundColor: userProfile.avatarUrl ? 'transparent' : userProfile.avatarColor }}
             >
-              {getUserInitials(currentUser.email)}
+              {userProfile.avatarUrl ? (
+                <img 
+                  src={userProfile.avatarUrl} 
+                  alt="Profile" 
+                  className="avatar-image"
+                />
+              ) : (
+                getUserInitials(currentUser.email)
+              )}
             </button>
             
             {showDropdown && (
@@ -99,9 +64,17 @@ const Navigation = () => {
                 <div className="dropdown-header">
                   <div 
                     className="dropdown-avatar"
-                    style={{ backgroundColor: avatarColor }}
+                    style={{ backgroundColor: userProfile.avatarUrl ? 'transparent' : userProfile.avatarColor }}
                   >
-                    {getUserInitials(currentUser.email)}
+                    {userProfile.avatarUrl ? (
+                      <img 
+                        src={userProfile.avatarUrl} 
+                        alt="Profile" 
+                        className="dropdown-avatar-image"
+                      />
+                    ) : (
+                      getUserInitials(currentUser.email)
+                    )}
                   </div>
                   <div className="dropdown-info">
                     <span className="dropdown-email">{currentUser.email}</span>
@@ -139,7 +112,7 @@ const Navigation = () => {
                 <div className="dropdown-divider"></div>
                 <button className="dropdown-item logout" onClick={handleLogout}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>

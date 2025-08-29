@@ -2,7 +2,15 @@ class CloudinaryService {
   constructor() {
     this.cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
     this.uploadPreset = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET;
+    this.thumbnailPreset = 'codepod-thumbnails'; // Your specific preset
     this.baseUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}`;
+    
+    // Debug logging
+    console.log('Cloudinary Config:', {
+      cloudName: this.cloudName,
+      thumbnailPreset: this.thumbnailPreset,
+      baseUrl: this.baseUrl
+    });
   }
 
   /**
@@ -132,6 +140,67 @@ class CloudinaryService {
       : '';
     
     return `https://res.cloudinary.com/${this.cloudName}/image/upload${transformString}/${publicId}`;
+  }
+
+  /**
+   * Upload thumbnail for project
+   * @param {File} file - The thumbnail image file
+   * @returns {Promise<Object>} - Upload result
+   */
+  async uploadThumbnail(file) {
+    try {
+      // Validate file
+      if (!file) {
+        throw new Error('No file provided');
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('File must be an image');
+      }
+
+      // Check file size (10MB limit for thumbnails)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new Error('File size must be less than 10MB');
+      }
+
+      console.log('Uploading thumbnail with preset:', this.thumbnailPreset);
+      console.log('File details:', { name: file.name, size: file.size, type: file.type });
+
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', this.thumbnailPreset);
+      formData.append('folder', 'thumbnails');
+
+      // Upload to Cloudinary
+      const response = await fetch(`${this.baseUrl}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('Cloudinary error response:', result);
+        throw new Error(result.error?.message || `Upload failed: ${response.status}`);
+      }
+
+      console.log('Upload successful:', result);
+      
+      return {
+        url: result.secure_url,
+        publicId: result.public_id,
+        width: result.width,
+        height: result.height,
+        format: result.format,
+        bytes: result.bytes
+      };
+    } catch (error) {
+      console.error('Cloudinary thumbnail upload error:', error);
+      throw error;
+    }
   }
 }
 
