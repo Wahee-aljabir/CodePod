@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../firebase/config';
-import { collection, query, where, getDocs, doc, deleteDoc, addDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, deleteDoc, addDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { getUserProjects, getPublicProjects, deleteProject } from '../../services/firestoreService'; // Add missing imports
 import ConfirmationModal from '../ConfirmationModal/ConfirmationModal'; // Add missing import
 import cloudinaryService from '../../services/cloudinaryService';
 import './Dashboard.css';
 
 const Dashboard = ({ onOpenProject, onNewProject }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const [userProjects, setUserProjects] = useState([]);
   const [communityProjects, setCommunityProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, project: null });
   const [deleting, setDeleting] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
     loadProjects();
@@ -72,7 +71,26 @@ const Dashboard = ({ onOpenProject, onNewProject }) => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+    const [projectUserProfile, setProjectUserProfile] = useState(null);
     const hasContent = project.html || project.css || project.js;
+
+    // Fetch user profile for community projects
+    useEffect(() => {
+      const fetchProjectUserProfile = async () => {
+        if (!isUserProject && project.userId) {
+          try {
+            const userDoc = await getDoc(doc(db, 'users', project.userId));
+            if (userDoc.exists()) {
+              setProjectUserProfile(userDoc.data());
+            }
+          } catch (error) {
+            console.error('Error fetching project user profile:', error);
+          }
+        }
+      };
+      
+      fetchProjectUserProfile();
+    }, [project.userId, isUserProject]);
     
     const handleThumbnailUpload = async (e) => {
       const file = e.target.files[0];
@@ -167,22 +185,29 @@ const Dashboard = ({ onOpenProject, onNewProject }) => {
         <div className="pod-info">
           <div className="pod-header">
             <div className="user-avatar">
-              {isUserProject && userProfile?.avatarUrl && !avatarError ? (
-                <img 
-                  src={userProfile.avatarUrl} 
-                  alt="User avatar" 
-                  className="avatar-image"
-                  onError={() => setAvatarError(true)}
-                />
-              ) : (
-                <div className="avatar-initials" style={{ backgroundColor: userProfile?.avatarColor || '#667eea' }}>
-                  {isUserProject ? getUserInitials(currentUser?.email) : getUserInitials(project.userEmail)}
-                </div>
-              )}
+              {(() => {
+                const profileToUse = isUserProject ? userProfile : projectUserProfile;
+                const avatarUrl = profileToUse?.avatarUrl;
+                const avatarColor = profileToUse?.avatarColor || '#667eea';
+                const emailForInitials = isUserProject ? currentUser?.email : project.userEmail;
+                
+                return avatarUrl && !avatarError ? (
+                  <img 
+                    src={avatarUrl} 
+                    alt="User avatar" 
+                    className="avatar-image"
+                    onError={() => setAvatarError(true)}
+                  />
+                ) : (
+                  <div className="avatar-initials" style={{ backgroundColor: avatarColor }}>
+                    {getUserInitials(emailForInitials)}
+                  </div>
+                );
+              })()} 
             </div>
             <div className="pod-details">
               <h3 className="pod-name">{project.name || 'Untitled Pod'}</h3>
-              <span className="author">by {isUserProject ? (userProfile?.displayName || currentUser?.email?.split('@')[0] || 'You') : (project.userEmail?.split('@')[0] || 'Anonymous')}</span>
+              <span className="author">by {isUserProject ? (userProfile?.displayName || currentUser?.email?.split('@')[0] || 'You') : (projectUserProfile?.displayName || project.userEmail?.split('@')[0] || 'Anonymous')}</span>
             </div>
             <div className="pod-actions">
               {project.isPublic && (
