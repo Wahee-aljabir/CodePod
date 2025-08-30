@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 // Import routes
@@ -42,7 +43,7 @@ app.use('/api/', limiter);
 // CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.com'] 
+    ? ['https://codepod.onrender.com'] 
     : ['http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true,
   optionsSuccessStatus: 200
@@ -75,12 +76,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/users', userRoutes);
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`
-  });
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Handle React Router - send all non-API requests to React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 // Global error handler
