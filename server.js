@@ -52,9 +52,10 @@ app.use(helmet({
         "https://accounts.google.com"
       ],
       frameSrc: [
-        "'self'",
-        "https://accounts.google.com"
-      ],
+         "'self'",
+         "https://accounts.google.com",
+         "https://codepod-3031b.firebaseapp.com"
+       ],
       imgSrc: [
         "'self'",
         "data:",
