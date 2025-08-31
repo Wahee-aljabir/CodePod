@@ -95,9 +95,24 @@ export function AuthProvider({ children }) {
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
+  const [isGoogleSignInInProgress, setIsGoogleSignInInProgress] = useState(false);
+
   const loginWithGoogle = async () => {
+    // Prevent multiple simultaneous sign-in attempts
+    if (isGoogleSignInInProgress) {
+      throw new Error('Google sign-in is already in progress. Please wait.');
+    }
+
     try {
+      setIsGoogleSignInInProgress(true);
       console.log('Starting Google sign-in...');
+      
+      // Clear any existing popup state
+      googleProvider.setCustomParameters({
+        prompt: 'select_account',
+        hd: undefined // Clear any domain hint
+      });
+      
       const result = await signInWithPopup(auth, googleProvider);
       console.log('Google sign-in successful:', result.user.email);
       return result;
@@ -111,9 +126,15 @@ export function AuthProvider({ children }) {
         throw new Error('Popup was blocked by your browser. Please allow popups and try again.');
       } else if (error.code === 'auth/cancelled-popup-request') {
         throw new Error('Another sign-in popup is already open.');
+      } else if (error.code === 'auth/network-request-failed') {
+        throw new Error('Network error. Please check your connection and try again.');
+      } else if (error.code === 'auth/internal-error') {
+        throw new Error('Authentication service error. Please try again in a moment.');
       } else {
         throw new Error('Failed to sign in with Google. Please try again.');
       }
+    } finally {
+      setIsGoogleSignInInProgress(false);
     }
   };
 
@@ -130,7 +151,8 @@ export function AuthProvider({ children }) {
     login,
     signup,
     loginWithGoogle,
-    logout
+    logout,
+    isGoogleSignInInProgress
   };
 
   return (

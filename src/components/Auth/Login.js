@@ -7,7 +7,7 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, isGoogleSignInInProgress } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
@@ -25,6 +25,11 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
   }
 
   async function handleGoogleLogin() {
+    // Prevent multiple clicks during Google sign-in
+    if (isGoogleSignInInProgress) {
+      return;
+    }
+
     try {
       setError('');
       setLoading(true);
@@ -32,6 +37,7 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
       navigate('/');
     } catch (error) {
       setError('Failed to log in with Google: ' + error.message);
+    } finally {
       setLoading(false);
     }
   }
@@ -49,7 +55,7 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
         <div>
           <button
             onClick={handleGoogleLogin}
-            disabled={loading}
+            disabled={loading || isGoogleSignInInProgress}
             className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -58,7 +64,7 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continue with Google
+            {isGoogleSignInInProgress ? 'Signing in with Google...' : 'Continue with Google'}
           </button>
         </div>
 
