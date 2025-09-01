@@ -9,6 +9,7 @@ import Navigation from './components/Navigation/Navigation';
 import DiscussionList from './components/Discussion/DiscussionList';
 import DiscussionDetail from './components/Discussion/DiscussionDetail';
 import Profile from './components/Profile/Profile';
+import GoogleSignInDebug from './components/Debug/GoogleSignInDebug';
 import './App.css';
 
 <Route path="/profile" element={<Profile />} />
@@ -77,6 +78,16 @@ function ProfileWrapper() {
   );
 }
 
+// Wrapper component for Debug with navigation
+function DebugWrapper() {
+  return (
+    <>
+      <Navigation />
+      <GoogleSignInDebug />
+    </>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -112,6 +123,11 @@ function App() {
             <Route path="/discussions/:id" element={
               <ProtectedRoute>
                 <DiscussionDetailWrapper />
+              </ProtectedRoute>
+            } />
+            <Route path="/debug" element={
+              <ProtectedRoute>
+                <DebugWrapper />
               </ProtectedRoute>
             } />
           </Routes>

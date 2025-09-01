@@ -7,7 +7,7 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, loginWithGoogle, isGoogleSignInInProgress } = useAuth();
+  const { login, loginWithGoogle, loginWithGoogleRedirect, isGoogleSignInInProgress, useRedirect } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
@@ -37,7 +37,20 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
       navigate('/');
     } catch (error) {
       setError('Failed to log in with Google: ' + error.message);
+      console.error('Login error details:', error);
     } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleRedirectLogin() {
+    try {
+      setError('');
+      setLoading(true);
+      await loginWithGoogleRedirect();
+      // Redirect will handle navigation
+    } catch (error) {
+      setError('Failed to redirect for Google login: ' + error.message);
       setLoading(false);
     }
   }
@@ -51,8 +64,8 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
           </h2>
         </div>
         
-        {/* Google Login Button */}
-        <div>
+        {/* Google Login Buttons */}
+        <div className="space-y-3">
           <button
             onClick={handleGoogleLogin}
             disabled={loading || isGoogleSignInInProgress}
@@ -66,6 +79,19 @@ function Login({ onSwitchToSignup, onSwitchToForgotPassword }) {
             </svg>
             {isGoogleSignInInProgress ? 'Signing in with Google...' : 'Continue with Google'}
           </button>
+          
+          {useRedirect && (
+            <button
+              onClick={handleGoogleRedirectLogin}
+              disabled={loading || isGoogleSignInInProgress}
+              className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Try Redirect Method
+            </button>
+          )}
         </div>
 
         <div className="relative">

@@ -7,7 +7,8 @@ import {
   signOut, 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup
+  signInWithPopup,
+  getRedirectResult
 } from 'firebase/auth';
 
 const AuthContext = createContext();
@@ -84,6 +85,22 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
+    // Handle redirect result for Google sign-in
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log('Google redirect sign-in successful:', result.user.email);
+          setIsGoogleSignInInProgress(false);
+        }
+      } catch (error) {
+        console.error('Redirect result error:', error);
+        setIsGoogleSignInInProgress(false);
+      }
+    };
+    
+    handleRedirectResult();
+
     return unsubscribe;
   }, []);
 
@@ -96,6 +113,7 @@ export function AuthProvider({ children }) {
   };
 
   const [isGoogleSignInInProgress, setIsGoogleSignInInProgress] = useState(false);
+  const [useRedirect, setUseRedirect] = useState(false);
 
   const loginWithGoogle = async () => {
     // Prevent multiple simultaneous sign-in attempts
@@ -106,6 +124,8 @@ export function AuthProvider({ children }) {
     try {
       setIsGoogleSignInInProgress(true);
       console.log('Starting Google sign-in...');
+      console.log('Current domain:', window.location.hostname);
+      console.log('Firebase auth domain:', process.env.REACT_APP_FIREBASE_AUTH_DOMAIN);
       
       // Clear any existing popup state
       googleProvider.setCustomParameters({
@@ -113,17 +133,31 @@ export function AuthProvider({ children }) {
         hd: undefined // Clear any domain hint
       });
       
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log('Google sign-in successful:', result.user.email);
-      return result;
+      // Try popup first, fallback to redirect if it fails
+      if (useRedirect) {
+        console.log('Using redirect method for Google sign-in');
+        const { signInWithRedirect } = await import('firebase/auth');
+        await signInWithRedirect(auth, googleProvider);
+        return; // Redirect will handle the rest
+      } else {
+        console.log('Using popup method for Google sign-in');
+        const result = await signInWithPopup(auth, googleProvider);
+        console.log('Google sign-in successful:', result.user.email);
+        return result;
+      }
     } catch (error) {
       console.error('Google sign-in error:', error.code, error.message);
+      console.error('Full error object:', error);
       
       // Handle specific error cases
       if (error.code === 'auth/popup-closed-by-user') {
-        throw new Error('Sign-in was cancelled. Please try again.');
+        console.log('Popup closed by user, switching to redirect method');
+        setUseRedirect(true);
+        throw new Error('Sign-in popup was closed. Click "Try Redirect" to use an alternative method.');
       } else if (error.code === 'auth/popup-blocked') {
-        throw new Error('Popup was blocked by your browser. Please allow popups and try again.');
+        console.log('Popup blocked, switching to redirect method');
+        setUseRedirect(true);
+        throw new Error('Popup was blocked. Click "Try Redirect" to use an alternative method.');
       } else if (error.code === 'auth/cancelled-popup-request') {
         throw new Error('Another sign-in popup is already open.');
       } else if (error.code === 'auth/network-request-failed') {
@@ -135,6 +169,20 @@ export function AuthProvider({ children }) {
       }
     } finally {
       setIsGoogleSignInInProgress(false);
+    }
+  };
+
+  const loginWithGoogleRedirect = async () => {
+    try {
+      setIsGoogleSignInInProgress(true);
+      console.log('Starting Google redirect sign-in...');
+      
+      const { signInWithRedirect } = await import('firebase/auth');
+      await signInWithRedirect(auth, googleProvider);
+    } catch (error) {
+      console.error('Google redirect sign-in error:', error);
+      setIsGoogleSignInInProgress(false);
+      throw error;
     }
   };
 
@@ -151,8 +199,10 @@ export function AuthProvider({ children }) {
     login,
     signup,
     loginWithGoogle,
+    loginWithGoogleRedirect,
     logout,
-    isGoogleSignInInProgress
+    isGoogleSignInInProgress,
+    useRedirect
   };
 
   return (

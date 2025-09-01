@@ -103,6 +103,12 @@ const Navigation = () => {
                   </svg>
                   Profile
                 </button>
+                <button className="dropdown-item" onClick={() => { navigate('/debug'); setShowDropdown(false); }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L13.09 8.26L22 9L17 14L18.18 22L12 19L5.82 22L7 14L2 9L10.91 8.26L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Debug Google Sign-In
+                </button>
                 <button className="dropdown-item" onClick={() => setShowDropdown(false)}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M19.4 15C19.2669 15 19.1538 14.9231 19.0769 14.8462C19 14.7692 19 14.6538 19 14.5385V9.46154C19 9.34615 19 9.23077 19.0769 9.15385C19.1538 9.07692 19.2669 9 19.4 9H20.6C20.7331 9 20.8462 9.07692 20.9231 9.15385C21 9.23077 21 9.34615 21 9.46154V14.5385C21 14.6538 21 14.7692 20.9231 14.8462C20.8462 14.9231 20.7331 15 20.6 15H19.4Z" stroke="currentColor" strokeWidth="2"/>
